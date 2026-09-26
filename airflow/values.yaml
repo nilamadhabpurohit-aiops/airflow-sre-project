@@ -1,0 +1,48 @@
+executor: KubernetesExecutor
+
+postgresql:
+  enabled: false
+
+redis:
+  enabled: false
+
+data:
+  metadataConnection:
+    user: airflow
+    pass: airflowpass
+    protocol: postgresql
+    host: postgres
+    port: 5432
+    db: airflow
+    sslmode: disable
+
+dags:
+  gitSync:
+    enabled: true
+    repo: https://github.com/nilamadhabpurohit-aiops/airflow-sre-project.git
+    branch: main
+    ref: main
+    rev: HEAD
+    subPath: airflow/dags
+    depth: 1
+    period: 5s
+
+webserver:
+  replicas: 1
+
+scheduler:
+  replicas: 1
+
+apiServer:
+  replicas: 1
+
+dagProcessor:
+  replicas: 1
+
+triggerer:
+  replicas: 1
+
+workers:
+  replicas: 0
+
+allowPodLaunching: true
