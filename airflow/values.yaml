@@ -57,5 +57,6 @@ logs:
     enabled: true
     size: 5Gi
     storageClassName: standard
+    accessMode: ReadWriteOnce
 
 allowPodLaunching: true
