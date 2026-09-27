@@ -43,6 +43,13 @@ triggerer:
   replicas: 1
 
 workers:
-  replicas: 0
+  kubernetes:
+    podTemplate:
+      spec:
+        containers:
+          - name: base
+            envFrom:
+              - secretRef:
+                  name: analytics-db-secret
 
 allowPodLaunching: true
