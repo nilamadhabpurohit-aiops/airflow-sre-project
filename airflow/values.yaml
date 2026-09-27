@@ -54,9 +54,6 @@ workers:
 
 logs:
   persistence:
-    enabled: true
-    size: 5Gi
-    storageClassName: standard
-    accessMode: ReadWriteOnce
+    enabled: false
 
 allowPodLaunching: true
