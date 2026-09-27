@@ -1,11 +1,12 @@
 from datetime import datetime
 
-from airflow.sdk import DAG
-from airflow.providers.standard.operators.python import PythonOperator
 import psycopg2
 
+from airflow.sdk import DAG
+from airflow.providers.standard.operators.python import PythonOperator
 
-def read_customers():
+
+def transform_and_load():
     conn = psycopg2.connect(
         host="postgres",
         port=5432,
@@ -16,12 +17,38 @@ def read_customers():
 
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id, name, email, country FROM customers")
-
+    # Extract
+    cursor.execute(
+        "SELECT id, name, email, country FROM customers"
+    )
     customers = cursor.fetchall()
 
-    for customer in customers:
-        print(customer)
+    # Transform + Load
+    for customer_id, name, email, country in customers:
+        cursor.execute(
+            """
+            INSERT INTO customer_summary
+                (id, name, email, country)
+            VALUES
+                (%s, %s, %s, %s)
+            ON CONFLICT (id)
+            DO UPDATE SET
+                name = EXCLUDED.name,
+                email = EXCLUDED.email,
+                country = EXCLUDED.country,
+                processed_at = CURRENT_TIMESTAMP
+            """,
+            (
+                customer_id,
+                name,
+                email,
+                country.upper(),
+            ),
+        )
+
+    conn.commit()
+
+    print(f"Processed {len(customers)} customers")
 
     cursor.close()
     conn.close()
@@ -32,10 +59,10 @@ with DAG(
     start_date=datetime(2026, 1, 1),
     schedule=None,
     catchup=False,
-    tags=["sre", "postgres", "learning"],
+    tags=["sre", "postgres", "etl"],
 ) as dag:
 
-    read_customers_task = PythonOperator(
-        task_id="read_customers",
-        python_callable=read_customers,
+    transform_and_load_task = PythonOperator(
+        task_id="transform_and_load",
+        python_callable=transform_and_load,
     )
