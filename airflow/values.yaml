@@ -52,4 +52,10 @@ workers:
               - secretRef:
                   name: analytics-db-secret
 
+logs:
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClassName: standard
+
 allowPodLaunching: true
