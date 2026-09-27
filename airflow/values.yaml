@@ -42,15 +42,28 @@ dagProcessor:
 triggerer:
   replicas: 1
 
-workers:
-  kubernetes:
-    podTemplate:
-      spec:
-        containers:
-          - name: base
-            envFrom:
-              - secretRef:
-                  name: analytics-db-secret
+# Restore normal KubernetesExecutor worker-pod cleanup after diagnosis.
+config:
+  kubernetes_executor:
+    delete_worker_pods: "True"
+
+# Map the Secret's POSTGRES_* keys to the PG* names used by customer_pipeline.py.
+extraEnv: |
+  - name: PGUSER
+    valueFrom:
+      secretKeyRef:
+        name: analytics-db-secret
+        key: POSTGRES_USER
+  - name: PGPASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: analytics-db-secret
+        key: POSTGRES_PASSWORD
+  - name: PGDATABASE
+    valueFrom:
+      secretKeyRef:
+        name: analytics-db-secret
+        key: POSTGRES_DB
 
 logs:
   persistence:

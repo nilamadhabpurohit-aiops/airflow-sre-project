@@ -106,6 +106,8 @@ with DAG(
     extract_task = PythonOperator(
         task_id="extract_customers",
         python_callable=extract_customers,
+        retries=2,
+        retry_delay=30,
     )
 
     validate_task = PythonOperator(
